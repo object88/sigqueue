@@ -75,7 +75,7 @@ func (h *Heap) grow() {
 }
 
 func (h *Heap) shrink() {
-	if len(h.a)>>1 <= heapMinimum || len(h.a)>>2 > h.size {
+	if len(h.a)>>1 <= heapMinimum || len(h.a)>>2 < h.size {
 		return
 	}
 

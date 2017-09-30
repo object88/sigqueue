@@ -83,26 +83,5 @@ func (ll *LinkedList) Pop() IDer {
 		}
 	}
 
-	// if ll.head != nil {
-	// 	ll.head.prev = nil
-	// 	if ll.tail != nil {
-	// 		ll.tail = ll.tail.prev
-	// 	}
-	// }
-
-	// if ll.head == nil {
-	// 	ll.tail = nil
-	// }
-
-	// lli := ll.tail
-	// ll.tail = lli.prev
-	// if ll.tail != nil {
-	// 	ll.tail.next = nil
-	// }
-
-	// if ll.tail == nil {
-	// 	ll.head = nil
-	// }
-
 	return lli.item
 }

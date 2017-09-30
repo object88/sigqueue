@@ -1,6 +1,8 @@
 package sigqueue
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_Heap_Create(t *testing.T) {
 	h := CreateHeap()
@@ -198,4 +200,21 @@ func Test_Heap_Grow_No_Shrink(t *testing.T) {
 	}
 }
 
-// TODO: Test heap growth and actual shrink.
+func Test_Heap_Grow_Shrink(t *testing.T) {
+	h := CreateHeap()
+
+	for i := 0; i < 33; i++ {
+		h.Insert(i + 1)
+	}
+
+	for i := 0; i < 25; i++ {
+		h.RemoveMinimum()
+	}
+
+	if h.size != 8 {
+		t.Errorf("Unexpected shrink to %d", h.size)
+	}
+	if len(h.a) != 16 {
+		t.Errorf("Unexpected shrink to %d", h.size)
+	}
+}
