@@ -19,6 +19,10 @@ func Test_LinkedList_Create(t *testing.T) {
 	if ll.head != nil || ll.tail != nil {
 		t.Error("Newly created linked list has non-nil head or tail")
 	}
+
+	if ll.size != 0 {
+		t.Errorf("Initial size is non-zero: %d", ll.size)
+	}
 }
 
 func Test_LinkedList_Push_Nil(t *testing.T) {
@@ -41,6 +45,9 @@ func Test_LinkedList_Push_Nil(t *testing.T) {
 	if ll0.head.next != nil || ll0.head.prev != nil {
 		t.Error("Head next or prev is not nil")
 	}
+	if ll0.size != 1 {
+		t.Errorf("Incorrect size %d", ll.size)
+	}
 }
 
 func Test_LinkedList_Push_Empty(t *testing.T) {
@@ -62,6 +69,9 @@ func Test_LinkedList_Push_Empty(t *testing.T) {
 	}
 	if ll.head.next != nil || ll.head.prev != nil {
 		t.Error("Head next or prev is not nil")
+	}
+	if ll.size != 1 {
+		t.Errorf("Incorrect size %d", ll.size)
 	}
 }
 
@@ -89,6 +99,9 @@ func Test_LinkedList_Push_One(t *testing.T) {
 	}
 	if ll.tail.prev != ll.head {
 		t.Error("Tail.prev is not head")
+	}
+	if ll.size != 2 {
+		t.Errorf("Incorrect size %d", ll.size)
 	}
 }
 
@@ -218,6 +231,9 @@ func Test_LinkedList_Pop_Empty(t *testing.T) {
 	if x0 != nil {
 		t.Error("Got non-nil from empty linked list")
 	}
+	if ll.size != 0 {
+		t.Errorf("Incorrect size %d", ll.size)
+	}
 }
 
 func Test_LinkedList_Pop_One(t *testing.T) {
@@ -234,6 +250,9 @@ func Test_LinkedList_Pop_One(t *testing.T) {
 	}
 	if ll.head != nil || ll.tail != nil {
 		t.Error("Head or tail is not nil")
+	}
+	if ll.size != 0 {
+		t.Errorf("Incorrect size %d", ll.size)
 	}
 }
 
@@ -265,6 +284,9 @@ func Test_LinkedList_Pop_Two(t *testing.T) {
 	}
 	if ll.head.next != nil {
 		t.Error("Head.next does not point to nil")
+	}
+	if ll.size != 1 {
+		t.Errorf("Incorrect size %d", ll.size)
 	}
 }
 

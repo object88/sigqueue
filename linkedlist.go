@@ -5,6 +5,7 @@ package sigqueue
 type LinkedList struct {
 	head *linkedListItem
 	tail *linkedListItem
+	size int
 }
 
 type linkedListItem struct {
@@ -15,7 +16,7 @@ type linkedListItem struct {
 
 // CreateLinkedList returns a new LinkedList structure.
 func CreateLinkedList() *LinkedList {
-	return &LinkedList{nil, nil}
+	return &LinkedList{nil, nil, 0}
 }
 
 // Peek returns the item at the head of the linked list without popping it off,
@@ -62,6 +63,8 @@ func (ll *LinkedList) Push(item IDer) *LinkedList {
 		ll.tail = lli
 	}
 
+	ll.size++
+
 	return ll
 }
 
@@ -83,5 +86,15 @@ func (ll *LinkedList) Pop() IDer {
 		}
 	}
 
+	ll.size--
+
 	return lli.item
+}
+
+// Size returns the number of elements in the linked list.
+func (ll *LinkedList) Size() int {
+	if ll == nil {
+		return 0
+	}
+	return ll.size
 }
