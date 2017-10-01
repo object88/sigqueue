@@ -7,39 +7,89 @@ import (
 
 // Sigqueue is a signalling queue.
 type Sigqueue struct {
-	ll *LinkedList
-	h  *Heap
-	m  sync.Mutex
+	waiters     *LinkedList
+	readied     *Heap
+	waitersLock sync.Mutex
+	readiedLock sync.Mutex
+	notify      chan<- IDer
+	signal      *Signal
 }
 
 // CreateSigqueue creates a new instance of Sigqueue
-func CreateSigqueue() *Sigqueue {
-	return &Sigqueue{
-		ll: CreateLinkedList(),
-		h:  CreateHeap(),
+func CreateSigqueue(notify chan<- IDer) *Sigqueue {
+	s := &Sigqueue{
+		waiters: CreateLinkedList(),
+		readied: CreateHeap(),
+		notify:  notify,
+		signal:  CreateSignal(),
 	}
+
+	go s.process()
+
+	return s
 }
 
-// WaitOn insert an item to wait for,  at the bottom of the queue.  Items
+// WaitOn insert an item to wait for, added at the bottom of the queue.  Items
 // must be monotonically increasing by ID.  An error is returned if the
 // ID regresses, and the item is not queued.
 func (s *Sigqueue) WaitOn(item IDer) error {
-	s.m.Lock()
+	s.waitersLock.Lock()
 
-	id := s.ll.Peer()
+	id := s.waiters.Peer()
 	if id != nil && id.ID() >= item.ID() {
-		s.m.Unlock()
-		return fmt.Errorf("Cannot queue item; ID is not increasing")
+		s.waitersLock.Unlock()
+		return NewErrOutOfOrderWait(item.ID())
 	}
 
-	s.ll.Push(item)
+	s.waiters.Push(item)
 
-	s.m.Unlock()
+	s.waitersLock.Unlock()
+
 	return nil
 }
 
 // Ready signals that the item should be signalled when it is at the top
 // of the queue.
 func (s *Sigqueue) Ready(item IDer) error {
+	id := item.ID()
+
+	s.readiedLock.Lock()
+
+	s.readied.Insert(id)
+	s.signal.Signal()
+
+	s.readiedLock.Unlock()
+
 	return nil
+}
+
+func (s *Sigqueue) process() {
+	for {
+		select {
+		case <-s.signal.Ready():
+			s.waitersLock.Lock()
+			s.readiedLock.Lock()
+
+			for {
+				id, err := s.readied.Minimum()
+				if err != nil && err != ErrHeapEmpty {
+					fmt.Printf("WE'RE GOING DOWN: %s\n", err.Error())
+					break
+				}
+				item := s.waiters.Peek()
+				if item == nil || item.ID() != id {
+					// The signal received was not for the oldest wait
+					break
+				}
+
+				// Remove the minimum value from the hash, and notify the consumer
+				// that the oldest wait is ready.
+				s.readied.RemoveMinimum()
+				s.notify <- s.waiters.Pop()
+			}
+
+			s.readiedLock.Unlock()
+			s.waitersLock.Unlock()
+		}
+	}
 }
